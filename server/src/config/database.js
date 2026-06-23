@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 
-async function connectToDb() {
+const connectToDb = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log("connect databade");
+    const connecting = await mongoose.connect(
+      "mongodb://localhost:27017/gen-ai",
+    );
+    console.log(" mongoode connect✅");
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 export default connectToDb;
