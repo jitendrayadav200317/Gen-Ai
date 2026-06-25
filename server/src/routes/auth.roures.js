@@ -1,5 +1,10 @@
 import express from "express";
-import { register, login, logout } from "../controllers/auth.controllers.js";
+import {
+  register,
+  login,
+  logout,
+  grtMeController,
+} from "../controllers/auth.controllers.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 
 const authRouter = express.Router();
@@ -29,5 +34,5 @@ authRouter.get("/logout", logout);
  * @description get the current logged in user details
  * @access private
  */
-authRouter.get("/get-me", authMiddleware);
+authRouter.get("/get-me", authMiddleware, grtMeController);
 export default authRouter;

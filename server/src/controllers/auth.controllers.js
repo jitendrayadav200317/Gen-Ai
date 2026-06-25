@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 
 import tokenBlackList from "../models/blacklist.model.js";
 import User from "../models/user.model.js";
-// import userModel from "../models/user.model.js";
 
 export const register = async (req, res) => {
   try {
@@ -103,4 +102,14 @@ export const logout = async (req, res) => {
   });
 };
 
-export const 
+export const grtMeController = async (req, res) => {
+  const user = await User.findById(req.user.id);
+  res.status(200).json({
+    message: "User details fatch successfully",
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+    },
+  });
+};
