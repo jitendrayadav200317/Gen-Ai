@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "http://localhost:3000",
   withCredentials: true,
 });
 
@@ -18,15 +18,32 @@ export async function register({ username, email, password }) {
   }
 }
 
+// export async function login({ email, password }) {
+//   try {
+//     const response = await api.post("/api/auth/login", {
+//       email,
+//       password,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error during login:", error);
+//   }
+// }
+
 export async function login({ email, password }) {
   try {
-    const response = await api.post("api/auth/login", {
+    const response = await api.post("/api/auth/login", {
       email,
       password,
     });
+
     return response.data;
   } catch (error) {
-    console.error("Error during login:", error);
+    console.error(
+      "Error during login:",
+      error?.response?.data || error.message,
+    );
+    throw error;
   }
 }
 
