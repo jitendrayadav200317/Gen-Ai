@@ -7,21 +7,27 @@ import User from "../models/user.model.js";
 export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    if ((!username, !email, !password)) {
+    if (!username || !email || !password) {
       return res.status(400).json({
-        message: "pleade provide input",
+        message: "Please provide all required fields",
       });
     }
-    const isUser = await User.findOne({ $or: [{ username }, { email }] });
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedUsername = username.trim();
+
+    const isUser = await User.findOne({
+      $or: [{ username: normalizedUsername }, { email: normalizedEmail }],
+    });
     if (isUser) {
       return res.status(400).json({
-        message: "Account already exists with this email or usernaem ",
+        message: "Account already exists with this email or username",
       });
     }
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({
-      username,
-      email,
+      username: normalizedUsername,
+      email: normalizedEmail,
       password: hash,
     });
     const token = jwt.sign(
@@ -32,19 +38,22 @@ export const register = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+    });
     res.status(201).json({
       message: "user register successfully",
       user: {
         username: user.username,
-        user: user.email,
+        email: user.email,
         id: user._id,
       },
     });
   } catch (error) {
     console.error(error);
-    res.status(404).json({
-      message: "register api faie",
+    res.status(500).json({
+      message: "register api failed",
     });
   }
 };
@@ -52,7 +61,14 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Please provide email and password",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(400).json({
         message: "invalid email or password",
@@ -72,12 +88,12 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
-    (res.cookie("token", token),
-      {
-        httpOnly: true,
-      });
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+    });
     res.status(200).json({
-      message: "User loggedin successfully",
+      message: "User logged in successfully",
       user: {
         id: user._id,
         email: user.email,
@@ -85,8 +101,9 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: "login api fail",
+      message: "login api failed",
     });
   }
 };
